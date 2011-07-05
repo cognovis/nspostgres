@@ -92,7 +92,7 @@ HDRS      = nspostgres.h
 #
 # Libraries required by this module
 #
-MODLIBS  += -L$(PGLIB) -lpq
+MODLIBS  += -L$(PGLIB) -lpq -lnsdb
 
 #
 # If PostgreSQL was compiled with OpenSSL support, you'll need to point the

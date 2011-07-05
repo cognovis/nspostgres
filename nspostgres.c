@@ -908,7 +908,7 @@ blob_get(Tcl_Interp *interp, Ns_DbHandle *handle, char* lob_id)
 		nbytes += byte_len;
 		n = byte_len;
 		for (i=0, j=0; n > 0; i += 4, j += 3, n -= 3) {
-			decode3(&data_column[i], &buf[j], n);
+		  decode3((unsigned char*)&data_column[i], &buf[j], n);
 		}
         buf[byte_len] = '\0';
 		Tcl_AppendResult(interp, buf, NULL);
@@ -980,7 +980,7 @@ blob_put(Tcl_Interp *interp, Ns_DbHandle *handle, char* blob_id,
 	    segment_len = value_len > 6000 ? 6000 : value_len;
         value_len -= segment_len;
 		for (i = 0, j = 0; i < segment_len; i += 3, j+=4) {
-			encode3(&value_ptr[i], &out_buf[j]);
+		  encode3((unsigned char *)&value_ptr[i], &out_buf[j]);
 		}
 		out_buf[j] = '\0';
 		sprintf(segment_pos, "%d, %d, '%s')", segment, segment_len, out_buf);
@@ -1046,7 +1046,7 @@ blob_dml_file(Tcl_Interp *interp, Ns_DbHandle *handle, char* blob_id,
 	readlen = read (fd, in_buf, 6000);
 	while (readlen > 0) {
 		for (i = 0, j = 0; i < readlen; i += 3, j+=4) {
-			encode3(&in_buf[i], &out_buf[j]);
+		  encode3((unsigned char *)&in_buf[i], &out_buf[j]);
 		}
 		out_buf[j] = '\0';
 		sprintf(segment_pos, "%d, %d, '%s')", segment, readlen, out_buf);
@@ -1181,7 +1181,7 @@ blob_send_to_stream(Tcl_Interp *interp, Ns_DbHandle *handle, char* lob_id,
     sscanf(byte_len_column, "%d", &byte_len);
     n = byte_len;
     for (i=0, j=0; n > 0; i += 4, j += 3, n -= 3) {
-      decode3(&data_column[i], &buf[j], n);
+      decode3((unsigned char *)&data_column[i], &buf[j], n);
     }
 
     stream_actually_write (fd, conn, buf, byte_len, to_conn_p);
@@ -1361,7 +1361,6 @@ parse_bind_variables(char *input,
   string_list_elt_t *elt, *head=0, *tail=0;
   string_list_elt_t *felt, *fhead=0, *ftail=0;
   int current_string_length = 0;
-  int first_bind = 0;
 
   fragbuf = (char*)Ns_Malloc((strlen(input)+1)*sizeof(char));
   fp = fragbuf;
@@ -1477,7 +1476,6 @@ PgBindCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   char              *sql;
   char              *value = NULL;
   char              *p;
-  int               value_frag_len = 0;
 
   if (argc < 4 || (!STREQ("-bind", argv[3]) && (argc != 4)) || 
        (STREQ("-bind", argv[3]) && (argc != 6))) {
@@ -1563,6 +1561,18 @@ PgBindCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
              */
             Ns_DStringAppend(&ds, "NULL");
         } else {
+ 	    int needEscapeStringSyntax = 0;
+
+	    /*
+	     * Determine, if we need the SQL escape string Syntax E'...'
+	     */
+            for (p = value; *p; p++) {
+                if (*p == '\\') {
+		    needEscapeStringSyntax = 1;
+		    break;
+		}
+	    }
+
             /*
              * DRB: We really only need to quote strings, but there is one benefit
              * to quoting numeric values as well.  A value like '35 union select...'
@@ -1571,7 +1581,7 @@ PgBindCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
              * This conversion is done before optimization of the query, so indices are
              * still used when appropriate.
              */
-            Ns_DStringAppend(&ds, "'");       
+            Ns_DStringAppend(&ds, needEscapeStringSyntax ? "E'" : "'");
 
             /*
              * DRB: Unfortunately, we need to double-quote quotes as well ... and
@@ -1597,7 +1607,7 @@ PgBindCmd(ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
                 Ns_DStringAppend(&ds, value);
             }
 
-            Ns_DStringAppend(&ds, "'");       
+            Ns_DStringAppend(&ds, "'");
         }
         var_p = var_p->next;
       }
