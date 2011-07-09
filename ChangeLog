@@ -1,4 +1,10 @@
-2007-06-12  tag nspostgres_v4_r1
+2011-07-09  Gustaf Neumann <neumann@wu-wien.ac.at>
+	tag nspostgres_v4_r2
+
+2011-07-05 Gustaf Neumann <neumann@wu-wien.ac.at>
+	* nspostgres.c: using SQL escape string syntax E'...' when needed (required in PostgreSql 9.1)
+	* nspostgres.c: cleanup to get rid of compilation warnings
+	* Makefile: add -lnsdb to the libraries
 
 2007-06-12  Dossy Shiobara <dossy@panoptic.com>
 
@@ -11,7 +17,7 @@
 	* README (1.6): Correct backslashes with forward slashes.
 
 2007-03-09  Jim Lynch <jim@jam.sessionsnet.org>
-	* backed out of defaulting POSTGRES var in Makefile; it should print a 
+	* backed out of defaulting POSTGRES var in Makefile; it should print a
 	message if not defined.
 
 2007-02-17  Jim Lynch <jim@jam.sessionsnet.org>
@@ -20,7 +26,7 @@
 	a new string. name changed from stringify_PQresultStatus to
 	append_PQresultStatus. added allocation responsibility to caller, who
 	now must allocate the string, pass it in, use the result then free the
-	string. function docs (in nspostgres.c just above function) altered 
+	string. function docs (in nspostgres.c just above function) altered
 	appropriately.
 
 2007-02-17  Jim Lynch <jim@jam.sessionsnet.org>
@@ -29,7 +35,7 @@
 
 2007-02-17  Jim Lynch <jim@jam.sessionsnet.org>
 	* factor:
-	we want to add the PQexec result status code to a string, so 
+	we want to add the PQexec result status code to a string, so
 	we will use a Tcl_DString which is a dynamic string. So, create
 	a function called stringify_PQresultStatus which returns pointer
 	to a newly allocated DString containing the result. This also checks
