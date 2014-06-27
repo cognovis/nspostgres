@@ -32,7 +32,7 @@
 #include "nspostgres.h"
 #include <tcl.h>
 
-DllExport int   Ns_ModuleVersion = 1;
+NS_EXPORT int   Ns_ModuleVersion = 1;
 
 static char datestyle[STRING_BUF_LEN];
 
@@ -67,7 +67,7 @@ append_PQresultStatus(Tcl_DString *collector, const PGresult *pgResult)
   Tcl_DStringAppend(collector, ")\n", -1);
 }
 
-DllExport int
+NS_EXTERN int
 Ns_DbDriverInit(char *hDriver, char *configPath)
 {
     char *t;
