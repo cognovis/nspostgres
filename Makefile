@@ -105,7 +105,7 @@ endif
 #
 # Compiler flags
 #
-CFLAGS   += -DBIND_EMULATION -I$(PGINC)
+CFLAGS   += -DBIND_EMULATION -I$(PGINC) -DUSE_INTERP_RESULT
 
 #
 # ACS users should set ACS=1
